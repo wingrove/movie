@@ -31,57 +31,103 @@ public class MovieResource {
 
 	public final static Map<Integer, Movie> movieDB = new HashMap<Integer, Movie>();
 
-//	@GET
-//	@Path("/{id}")
-//	public Response dispMessage(@PathParam("id") String id) {
-//		return Response.status(200).entity(id).build();
-//
-//	}
+	// @GET
+	// @Path("/{id}")
+	// public Response dispMessage(@PathParam("id") String id) {
+	// return Response.status(200).entity(id).build();
+	//
+	// }
 
-    /**
-     * Retrieve a phonebook entry and return it as a streaming output, using an XML representation
-     * @param id path parameter identifying the phonebook entry
-     * @return a representation of the streaming output for the resource representation
-     */
-    @GET
-    @Path( "/{id}" )
-    @Produces( MediaType.APPLICATION_XML )
-    public StreamingOutput getEntryXML(@PathParam("id") Integer id) 
-    {
-    		readMovieXML();
-        final Movie movie = movieDB.get(id);
+	@GET
+	@Path("/movie")
+	@Produces(MediaType.APPLICATION_XML)
+	public StreamingOutput allMovie() {
+		readMovieXML();
 
-        if (movie == null) {
-	    // if you'd like to log this exception in JBoss log file, use WebApplicationException
-	    // otherwise, use NoLogWebApplicationException, which will not log the exception
-            //throw new WebApplicationException( Response.Status.NOT_FOUND );
-            throw new NoLogWebApplicationException( Response.Status.NOT_FOUND );
-        }
+		if (movieDB == null) {
+			// if you'd like to log this exception in JBoss log file, use
+			// WebApplicationException
+			// otherwise, use NoLogWebApplicationException, which will not log
+			// the exception
+			// throw new WebApplicationException( Response.Status.NOT_FOUND );
+			throw new NoLogWebApplicationException(Response.Status.NOT_FOUND);
+		}
 
-        return new StreamingOutput() {
-            public void write(OutputStream output) throws IOException, NoLogWebApplicationException {
-                outputMovieXML(output, movie);
-            }
-        };
-    }
-    
-    private void outputMovieXML( OutputStream os, Movie movie ) 
-            throws IOException 
-    {
-        PrintStream writer = new PrintStream(os);
-        writer.println("<?xml version=\"1.0\"?>");
-        writer.println("<movie>");
-        writer.println("   <name>" + movie.getName() + "</name>");
-        writer.println("   <genres>" + movie.getGenres() + "</genres>");
-        writer.println("   <ratings>" + movie.getRatings() + "</ratings>");
-        writer.println("   <theater>" + movie.getTheater() + "</theater>");
-        writer.println("   <showTime>" + movie.getShowTime() + "</showTime>");
-        writer.println("   <theaterAddress>" + movie.getTheaterAddress() + "</theaterAddress>");
-        writer.println("   <description>" + movie.getDescription() + "</description>");
-        writer.println("</movie>");
-        writer.close();
-    }
-    
+		return new StreamingOutput() {
+			public void write(OutputStream output) throws IOException,
+					NoLogWebApplicationException {
+				outputMultipleMovieXML(output,movieDB);
+				
+			}
+		};
+	}
+
+
+	@GET
+	@Path("/{id}")
+	@Produces(MediaType.APPLICATION_XML)
+	public StreamingOutput getEntryXML(@PathParam("id") Integer id) {
+		readMovieXML();
+		final Movie movie = movieDB.get(id);
+
+		if (movie == null) {
+			// if you'd like to log this exception in JBoss log file, use
+			// WebApplicationException
+			// otherwise, use NoLogWebApplicationException, which will not log
+			// the exception
+			// throw new WebApplicationException( Response.Status.NOT_FOUND );
+			throw new NoLogWebApplicationException(Response.Status.NOT_FOUND);
+		}
+
+		return new StreamingOutput() {
+			public void write(OutputStream output) throws IOException,
+					NoLogWebApplicationException {
+				outputMovieXML(output, movie);
+			}
+		};
+	}
+
+	private void outputMultipleMovieXML(OutputStream os, Map<Integer, Movie> movieMap)
+			throws IOException {
+		PrintStream writer = new PrintStream(os);
+		writer.println("<?xml version=\"1.0\"?>");
+		writer.println("<movieList>");
+		for (Entry<Integer, Movie> pair : movieDB.entrySet()) {
+			Movie tmpMovie = pair.getValue();
+			writer.println("<movie id=\""+pair.getKey()+"\">");
+			writer.println("   <name>" + tmpMovie.getName() + "</name>");
+			writer.println("   <genres>" + tmpMovie.getGenres() + "</genres>");
+			writer.println("   <ratings>" + tmpMovie.getRatings() + "</ratings>");
+			writer.println("   <theater>" + tmpMovie.getTheater() + "</theater>");
+			writer.println("   <showTime>" + tmpMovie.getShowTime() + "</showTime>");
+			writer.println("   <theaterAddress>" + tmpMovie.getTheaterAddress()
+					+ "</theaterAddress>");
+			writer.println("   <description>" + tmpMovie.getDescription()
+					+ "</description>");
+			writer.println("</movie>");
+		}
+		writer.println("</movieList>");
+		writer.close();
+	}
+	
+	private void outputMovieXML(OutputStream os, Movie movie)
+			throws IOException {
+		PrintStream writer = new PrintStream(os);
+		writer.println("<?xml version=\"1.0\"?>");
+		writer.println("<movie>");
+		writer.println("   <name>" + movie.getName() + "</name>");
+		writer.println("   <genres>" + movie.getGenres() + "</genres>");
+		writer.println("   <ratings>" + movie.getRatings() + "</ratings>");
+		writer.println("   <theater>" + movie.getTheater() + "</theater>");
+		writer.println("   <showTime>" + movie.getShowTime() + "</showTime>");
+		writer.println("   <theaterAddress>" + movie.getTheaterAddress()
+				+ "</theaterAddress>");
+		writer.println("   <description>" + movie.getDescription()
+				+ "</description>");
+		writer.println("</movie>");
+		writer.close();
+	}
+
 	public void readMovieXML() {
 		try {
 
